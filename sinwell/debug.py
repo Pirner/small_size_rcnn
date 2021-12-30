@@ -6,6 +6,7 @@ import tensorflow as tf
 import cv2
 
 from rcnn.model import RCNNTrainWrapper
+from rcnn.data_utils import DataLoader
 
 
 def main():
@@ -13,7 +14,9 @@ def main():
     train an rcnn model from scratch
     :return:
     """
-    root_dataset_path = 'C:/private_projects/data/airplane_dataset'
+    # root_dataset_path = 'C:/private_projects/data/airplane_dataset'
+    root_dataset_path = 'C:/dev/data/airplanes'
+
     path = os.path.join(root_dataset_path, 'images')
     annot = os.path.join(root_dataset_path, 'airplanes_annotations')
 
@@ -52,6 +55,8 @@ def main():
     # plt.show()
 
     rcnn_trainer = RCNNTrainWrapper()
+    train_images, train_labels = DataLoader.load_data_csv_legacy(path, annot)
+    print(len(train_images))
 
 
 if __name__ == '__main__':
