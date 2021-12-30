@@ -1,6 +1,6 @@
 def get_iou(bb1, bb2):
     """
-    compute the intersection of union between two bboxes
+    compute the intersection of union between two bounding boxes
     :param bb1:
     :param bb2:
     :return:
