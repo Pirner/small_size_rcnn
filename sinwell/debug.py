@@ -15,11 +15,16 @@ def main():
     train an rcnn model from scratch
     :return:
     """
-    # root_dataset_path = 'C:/private_projects/data/airplane_dataset'
-    root_dataset_path = 'C:/dev/data/airplanes'
+    root_dataset_path = 'C:/private_projects/data/airplane_dataset'
+    data_save_dir = os.path.join(root_dataset_path, 'tmp')
+    # root_dataset_path = 'C:/dev/data/airplanes'
+
+    DataLoader.load_airplane_dataset(root_dataset_path, data_save_dir)
 
     path = os.path.join(root_dataset_path, 'images')
-    annot = os.path.join(root_dataset_path, 'airplanes_annotations')
+    annot = os.path.join(root_dataset_path, 'annotations')
+
+
 
     # draw a sample file
     # for e, i in enumerate(os.listdir(annot)):

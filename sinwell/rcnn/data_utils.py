@@ -1,11 +1,38 @@
 import os
 import cv2
 import pandas as pd
+import tensorflow as tf
 
 from rcnn.bbox_utils import get_iou
 
 
 class DataLoader:
+    @staticmethod
+    def load_airplane_dataset(root_dir, save_dir):
+        """
+        load the airplane dataset
+        :param root_dir: root directory to load data from
+        :param save_dir: directory to store created data in
+        :return:
+        """
+        cv2.setUseOptimized(True)
+        ss = cv2.ximgproc.segmentation.createSelectiveSearchSegmentation()
+
+        annotation_dir = os.path.join(root_dir, 'annotations')
+        im_dir = os.path.join(root_dir, 'images')
+
+        annotations = sorted(os.listdir(annotation_dir))
+        images = sorted(os.listdir(im_dir))
+
+        assert len(annotations) == len(images)
+
+        # iterate over the annotations to create
+        for i, (im_entry, ann_entry) in enumerate(zip(images, annotations)):
+            im_path = os.path.join(root_dir, im_entry)
+            ann_path = os.path.join(root_dir, ann_entry)
+            exit(0)
+            pass
+
     @staticmethod
     def load_data_csv_legacy(root_dir, annotation_dir):
         train_images = []
