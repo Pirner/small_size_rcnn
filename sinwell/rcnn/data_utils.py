@@ -63,24 +63,40 @@ class DataLoader:
             ss_results = ss.process()
             im_out = im.copy()
 
+            true_counter = 0
+            false_counter = 0
+
+            # constants
+            counter_threshold = 30
+
             for j, result in enumerate(ss_results):
                 x, y, w, h = result
+
+                pos_flag = False
                 # print(x, y, w, h)
                 ss_bbox = {'x1': x, 'x2': x + w, 'y1': y, 'y2': y + h}
                 for gt_bbox in gt_values:
                     # store a maximum of 30 positive and 30 negative results per image (to avoid too many samples)
                     # TODO implement boundaries
                     iou = get_iou(gt_bbox, ss_bbox)
-                    if iou > 0.70:
+
+                    # if the ground truth bounding box has enough shared area, then it can be saved
+                    if iou > 0.70 and true_counter < counter_threshold:
                         timage = im_out[y:y + h, x:x + w]
                         resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
-                        cv2.imwrite(os.path.join(save_dir, '{0:6d}.png'.format(n)), resized)
+                        cv2.imwrite(os.path.join(save_dir, 'pos_{:06d}.png'.format(n)), resized)
                         n += 1
-                    elif iou < 0.30:
-                        timage = im_out[y:y + h, x:x + w]
-                        resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
-                        cv2.imwrite(os.path.join(save_dir, '{0:6d}.png'.format(n)), resized)
-                        n += 1
+                        true_counter += 1
+                        pos_flag = True
+                        break
+
+                # it the candidate is not a positive one and there is still room for negative samples, save it
+                if false_counter < counter_threshold and not pos_flag:
+                    timage = im_out[y:y + h, x:x + w]
+                    resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
+                    cv2.imwrite(os.path.join(save_dir, '{:06d}.png'.format(n)), resized)
+                    n += 1
+                    false_counter += 1
 
             if i > 20:
                 exit(0)
