@@ -2,6 +2,8 @@ import os
 import cv2
 import pandas as pd
 import tensorflow as tf
+import shutil
+from tqdm import tqdm
 
 from rcnn.bbox_utils import get_iou
 
@@ -13,7 +15,7 @@ class DataLoader:
         load the airplane dataset
         :param root_dir: root directory to load data from
         :param save_dir: directory to store created data in
-        :return:
+        :return: two tensorflow sequence iterators to perform training on
         """
         cv2.setUseOptimized(True)
         ss = cv2.ximgproc.segmentation.createSelectiveSearchSegmentation()
@@ -26,12 +28,62 @@ class DataLoader:
 
         assert len(annotations) == len(images)
 
-        # iterate over the annotations to create
-        for i, (im_entry, ann_entry) in enumerate(zip(images, annotations)):
-            im_path = os.path.join(root_dir, im_entry)
-            ann_path = os.path.join(root_dir, ann_entry)
-            exit(0)
-            pass
+        if os.path.exists(save_dir):
+            shutil.rmtree(save_dir)
+
+        os.makedirs(save_dir, exist_ok=True)
+        n = 0
+
+        # iterate over the annotations to create training data
+        for i, (im_entry, ann_entry) in tqdm(enumerate(zip(images, annotations))):
+            im_path = os.path.join(im_dir, im_entry)
+            ann_path = os.path.join(annotation_dir, ann_entry)
+            if 'Lhasa' in im_path:
+                continue
+            df = pd.read_csv(ann_path)
+            im = cv2.imread(im_path)
+
+            gt_values = []
+
+            for row in df.iterrows():
+                x1 = int(row[1][0].split(' ')[0])
+                y1 = int(row[1][0].split(' ')[1])
+                x2 = int(row[1][0].split(' ')[2])
+                y2 = int(row[1][0].split(' ')[3])
+
+                gt_values.append({
+                    'x1': x1,
+                    'x2': x2,
+                    'y1': y1,
+                    'y2': y2,
+                })
+
+            ss.setBaseImage(im)
+            ss.switchToSelectiveSearchFast()
+            ss_results = ss.process()
+            im_out = im.copy()
+
+            for j, result in enumerate(ss_results):
+                x, y, w, h = result
+                # print(x, y, w, h)
+                ss_bbox = {'x1': x, 'x2': x + w, 'y1': y, 'y2': y + h}
+                for gt_bbox in gt_values:
+                    # store a maximum of 30 positive and 30 negative results per image (to avoid too many samples)
+                    # TODO implement boundaries
+                    iou = get_iou(gt_bbox, ss_bbox)
+                    if iou > 0.70:
+                        timage = im_out[y:y + h, x:x + w]
+                        resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
+                        cv2.imwrite(os.path.join(save_dir, '{0:6d}.png'.format(n)), resized)
+                        n += 1
+                    elif iou < 0.30:
+                        timage = im_out[y:y + h, x:x + w]
+                        resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
+                        cv2.imwrite(os.path.join(save_dir, '{0:6d}.png'.format(n)), resized)
+                        n += 1
+
+            if i > 20:
+                exit(0)
 
     @staticmethod
     def load_data_csv_legacy(root_dir, annotation_dir):
@@ -40,7 +92,7 @@ class DataLoader:
         cv2.setUseOptimized(True)
         ss = cv2.ximgproc.segmentation.createSelectiveSearchSegmentation()
 
-        for e, i in enumerate(os.listdir(annotation_dir)):
+        for e, i in tqdm(enumerate(os.listdir(annotation_dir))):
             try:
                 # if i.startswith('airplane'):
                 filename = i.split('.')[0] + '.jpg'
