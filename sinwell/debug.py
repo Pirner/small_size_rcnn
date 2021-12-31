@@ -3,10 +3,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import cv2
+from sklearn.model_selection import train_test_split
 
 from rcnn.model import RCNNTrainWrapper
 from rcnn.data_utils import DataLoader
+from rcnn.label_utils import AirplaneLabelBinarizer
 
 
 def main():
@@ -56,6 +57,30 @@ def main():
 
     rcnn_trainer = RCNNTrainWrapper()
     train_images, train_labels = DataLoader.load_data_csv_legacy(path, annot)
+
+    x_new = np.array(train_images)
+    y_new = np.array(train_labels)
+
+    l_enc = AirplaneLabelBinarizer()
+    y = l_enc.fit_transform(y_new)
+
+    x_train, x_test, y_train, y_test = train_test_split(x_new, y, test_size=0.1)
+
+    tr_data = tf.keras.preprocessing.image.ImageDataGenerator(
+        horizontal_flip=True,
+        vertical_flip=True,
+        rotation_range=90
+    )
+
+    train_data = tr_data.flow(x=x_train, y=y_train)
+    ts_data = tf.keras.preprocessing.image.ImageDataGenerator(
+        horizontal_flip=True,
+        vertical_flip=True,
+        rotation_range=90,
+    )
+
+    test_data = ts_data.flow(x=x_test, y=y_test)
+
     print(len(train_images))
 
 

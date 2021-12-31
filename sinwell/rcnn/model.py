@@ -47,3 +47,31 @@ class RCNNTrainWrapper:
 
         model_final.summary()
         self._model = model_final
+
+    def train_model(self, train_data, validation_data):
+        """
+        train the compiled model with the neck and backbone set up
+        :param train_data:
+        :param validation_data:
+        :return:
+        """
+        checkpoint = tf.keras.callbacks.ModelCheckpoint(
+            'ieeercnn_vgg16_1.h5',
+            monitor='val_loss',
+            verbose=1,
+            save_best_only=True,
+            period=1,
+        )
+
+        early = tf.keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=100, verbose=1, mode='auto')
+
+        hist = self._model.fit_generator(
+            generator=train_data,
+            steps_per_epoch=10,
+            epochs=5,
+            validation_data=validation_data,
+            validation_steps=2,
+            callbacks=[checkpoint, early]
+        )
+
+        print(hist)

@@ -47,34 +47,39 @@ class DataLoader:
                 bitflag = 0
 
                 for j, result in enumerate(ss_results):
-                    if j < 2000 and flag == 0:
-                        for gt_val in gt_values:
-                            x, y, w, h = result
-                            iou = get_iou(gt_val, {'x1': x, 'x2': x + w, 'y1': y, 'y2': y + h})
-                            if counter < 30:
-                                if iou > 0.70:
-                                    timage = im_out[y:y + h, x:x + w]
-                                    resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
-                                    train_images.append(resized)
-                                    train_labels.append(1)
-                                    counter += 1
-                            else:
-                                bitflag = 1
-                            if false_counter < 30:
-                                if iou < 0.3:
-                                    timage = im_out[y:y + h, x:x + w]
-                                    resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
-                                    train_images.append(resized)
-                                    train_labels.append(0)
-                                    false_counter += 1
-                            else:
-                                bitflag = 1
+                    try:
+                        if j < 2000 and flag == 0:
+                            for gt_val in gt_values:
+                                x, y, w, h = result
+                                iou = get_iou(gt_val, {'x1': x, 'x2': x + w, 'y1': y, 'y2': y + h})
+                                if counter < 30:
+                                    if iou > 0.70:
+                                        timage = im_out[y:y + h, x:x + w]
+                                        resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
+                                        train_images.append(resized)
+                                        train_labels.append(1)
+                                        counter += 1
+                                else:
+                                    bitflag = 1
+                                if false_counter < 30:
+                                    if iou < 0.3:
+                                        timage = im_out[y:y + h, x:x + w]
+                                        resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
+                                        train_images.append(resized)
+                                        train_labels.append(0)
+                                        false_counter += 1
+                                else:
+                                    bitflag = 1
 
-                        if lflag == 1 and bitflag == 1:
-                            print('inside')
-                            flag = 1
+                            if lflag == 1 and bitflag == 1:
+                                print('inside')
+                                flag = 1
+                    except Exception as e:
+                        print('error in filename: {0} with error {1}'.format(filename, str(e)))
+                        continue
 
             except Exception as e:
                 print('error in filename: {0} with error {1}'.format(filename, str(e)))
+                continue
 
             return train_images, train_labels
