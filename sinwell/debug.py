@@ -80,6 +80,7 @@ def main():
     )
 
     test_data = ts_data.flow(x=x_test, y=y_test)
+    rcnn_trainer.train_model(train_data, test_data)
 
     print(len(train_images))
 
