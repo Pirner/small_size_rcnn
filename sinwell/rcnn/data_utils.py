@@ -109,9 +109,6 @@ class DataLoader:
                     n += 1
                     false_counter += 1
 
-            if i > 20:
-                exit(0)
-
     @staticmethod
     def load_data_csv_legacy(root_dir, annotation_dir):
         train_images = []
