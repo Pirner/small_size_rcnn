@@ -84,7 +84,12 @@ class DataLoader:
                     if iou > 0.70 and true_counter < counter_threshold:
                         timage = im_out[y:y + h, x:x + w]
                         resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
-                        cv2.imwrite(os.path.join(save_dir, 'pos_{:06d}.png'.format(n)), resized)
+                        cv2.imwrite(os.path.join(save_dir, '{:06d}.png'.format(n)), resized)
+                        # write label
+                        label_path = os.path.join(save_dir, '{:06d}.txt'.format(n))
+                        f = open(label_path, 'a')
+                        f.write('1')
+                        f.close()
                         n += 1
                         true_counter += 1
                         pos_flag = True
@@ -95,6 +100,12 @@ class DataLoader:
                     timage = im_out[y:y + h, x:x + w]
                     resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
                     cv2.imwrite(os.path.join(save_dir, '{:06d}.png'.format(n)), resized)
+                    # write label
+                    label_path = os.path.join(save_dir, '{:06d}.txt'.format(n))
+                    f = open(label_path, 'a')
+                    f.write('0')
+                    f.close()
+
                     n += 1
                     false_counter += 1
 
