@@ -78,7 +78,6 @@ class DataLoader:
                 ss_bbox = {'x1': x, 'x2': x + w, 'y1': y, 'y2': y + h}
                 for gt_bbox in gt_values:
                     # store a maximum of 30 positive and 30 negative results per image (to avoid too many samples)
-                    # TODO implement boundaries
                     iou = get_iou(gt_bbox, ss_bbox)
 
                     # if the ground truth bounding box has enough shared area, then it can be saved
