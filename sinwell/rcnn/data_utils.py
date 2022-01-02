@@ -37,6 +37,7 @@ class DataLoader:
         # iterate over the annotations to create training data
         for i, (im_entry, ann_entry) in tqdm(enumerate(zip(images, annotations))):
             im_path = os.path.join(im_dir, im_entry)
+            print('Current image file treating:', im_path)
             ann_path = os.path.join(annotation_dir, ann_entry)
             if 'Lhasa' in im_path:
                 continue
