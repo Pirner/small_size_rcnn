@@ -10,12 +10,12 @@ class AirplaneDataGenerator(tf.keras.utils.Sequence):
             raise Exception('not equal length of labels and image paths provided.')
         self._labels = labels
         self._im_paths = im_paths
-        self._data = zip(im_paths, labels)
+        self._data = list(zip(im_paths, labels))
         self._indexes = None
 
     def on_epoch_end(self):
-        self._indexes = np.arange(len(self._data) / self._batch_size)
-        
+        if self._shuffle:
+            self._indexes = np.arange(len(self._data) / self._batch_size)
 
     def __get_data(self, indexes):
         pass

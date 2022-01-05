@@ -6,6 +6,7 @@ import shutil
 from tqdm import tqdm
 
 from rcnn.bbox_utils import get_iou
+from rcnn.generator import AirplaneDataGenerator
 
 
 class DataLoader:
@@ -25,6 +26,9 @@ class DataLoader:
 
         annotations = sorted(os.listdir(annotation_dir))
         images = sorted(os.listdir(im_dir))
+
+        t_image_paths = []
+        labels = []
 
         assert len(annotations) == len(images)
 
@@ -84,7 +88,11 @@ class DataLoader:
                     if iou > 0.70 and true_counter < counter_threshold:
                         timage = im_out[y:y + h, x:x + w]
                         resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
-                        cv2.imwrite(os.path.join(save_dir, '{:06d}.png'.format(n)), resized)
+
+                        t_image_path = os.path.join(save_dir, '{:06d}.png'.format(n))
+                        cv2.imwrite(t_image_path, resized)
+                        t_image_paths.append(t_image_path)
+                        labels.append(1)
                         # write label
                         label_path = os.path.join(save_dir, '{:06d}.txt'.format(n))
                         f = open(label_path, 'a')
@@ -99,7 +107,10 @@ class DataLoader:
                 if false_counter < counter_threshold and not pos_flag:
                     timage = im_out[y:y + h, x:x + w]
                     resized = cv2.resize(timage, (224, 224), interpolation=cv2.INTER_AREA)
+                    t_image_path = os.path.join(save_dir, '{:06d}.png'.format(n))
                     cv2.imwrite(os.path.join(save_dir, '{:06d}.png'.format(n)), resized)
+                    t_image_paths.append(t_image_path)
+                    labels.append(0)
                     # write label
                     label_path = os.path.join(save_dir, '{:06d}.txt'.format(n))
                     f = open(label_path, 'a')
@@ -108,6 +119,11 @@ class DataLoader:
 
                     n += 1
                     false_counter += 1
+
+                if i > 30:
+                    break
+
+        train_gen = AirplaneDataGenerator(t_image_paths, labels)
 
     @staticmethod
     def load_data_csv_legacy(root_dir, annotation_dir):
