@@ -16,15 +16,18 @@ def main():
     :return:
     """
     # deathstar setup
-    root_dataset_path = 'C:/dev/data/airplanes'
+    # root_dataset_path = 'C:/dev/data/airplanes'
     # notebook setup
-    # root_dataset_path = 'C:/private_projects/data/airplane_dataset'
+    root_dataset_path = 'C:/private_projects/data/airplane_dataset'
     data_save_dir = os.path.join(root_dataset_path, 'tmp')
 
-    DataLoader.load_airplane_dataset(root_dataset_path, data_save_dir)
+    train_gen, val_gen = DataLoader.load_airplane_dataset(root_dataset_path, data_save_dir)
+    rcnn_trainer = RCNNTrainWrapper()
+    rcnn_trainer.train_model(train_gen, val_gen)
+    # train_images, train_labels = DataLoader.load_data_csv_legacy(path, annot)
 
-    path = os.path.join(root_dataset_path, 'images')
-    annot = os.path.join(root_dataset_path, 'annotations')
+    # path = os.path.join(root_dataset_path, 'images')
+    # annot = os.path.join(root_dataset_path, 'annotations')
 
     # draw a sample file
     # for e, i in enumerate(os.listdir(annot)):
@@ -60,34 +63,31 @@ def main():
     # plt.imshow(im_out)
     # plt.show()
 
-    rcnn_trainer = RCNNTrainWrapper()
-    train_images, train_labels = DataLoader.load_data_csv_legacy(path, annot)
+    # x_new = np.array(train_images)
+    # y_new = np.array(train_labels)
 
-    x_new = np.array(train_images)
-    y_new = np.array(train_labels)
+    # l_enc = AirplaneLabelBinarizer()
+    # y = l_enc.fit_transform(y_new)
 
-    l_enc = AirplaneLabelBinarizer()
-    y = l_enc.fit_transform(y_new)
+    # x_train, x_test, y_train, y_test = train_test_split(x_new, y, test_size=0.1)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_new, y, test_size=0.1)
+    # tr_data = tf.keras.preprocessing.image.ImageDataGenerator(
+        # horizontal_flip=True,
+        # vertical_flip=True,
+        # rotation_range=90
+    # )
 
-    tr_data = tf.keras.preprocessing.image.ImageDataGenerator(
-        horizontal_flip=True,
-        vertical_flip=True,
-        rotation_range=90
-    )
+    # train_data = tr_data.flow(x=x_train, y=y_train)
+    # ts_data = tf.keras.preprocessing.image.ImageDataGenerator(
+        # horizontal_flip=True,
+        # vertical_flip=True,
+        # rotation_range=90,
+    # )
 
-    train_data = tr_data.flow(x=x_train, y=y_train)
-    ts_data = tf.keras.preprocessing.image.ImageDataGenerator(
-        horizontal_flip=True,
-        vertical_flip=True,
-        rotation_range=90,
-    )
+    # test_data = ts_data.flow(x=x_test, y=y_test)
+    # rcnn_trainer.train_model(train_data, test_data)
 
-    test_data = ts_data.flow(x=x_test, y=y_test)
-    rcnn_trainer.train_model(train_data, test_data)
-
-    print(len(train_images))
+    # print(len(train_images))
 
 
 if __name__ == '__main__':

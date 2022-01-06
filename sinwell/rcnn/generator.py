@@ -1,3 +1,4 @@
+import cv2
 import tensorflow as tf
 import numpy as np
 
@@ -18,11 +19,27 @@ class AirplaneDataGenerator(tf.keras.utils.Sequence):
             self._indexes = np.arange(len(self._data) / self._batch_size)
 
     def __get_data(self, indexes):
-        pass
+        data = list(self._data[indexes * self._batch_size:(indexes + 1) * self._batch_size])
 
-    def __getitem__(self, index):
-        im_paths = self._im_paths[index * self._batch_size:(index + 1) * self._batch_size]
-        labels = self._labels[index * self._batch_size:(index + 1) * self._batch_size]
+        images = []
+        labels = []
+
+        for im_path, label in data:
+            im = cv2.imread(im_path)
+            images.append(im)
+            labels.append(label)
+
+        x_batch = np.array(images)
+        y_batch = np.array(labels)
+        y_batch = np.reshape(y_batch, (self._batch_size, 2))
+
+        return x_batch, y_batch
+
+    def __getitem__(self, indexes):
+        im_paths = self._im_paths[indexes * self._batch_size:(indexes + 1) * self._batch_size]
+        labels = self._labels[indexes * self._batch_size:(indexes + 1) * self._batch_size]
+
+        return self.__get_data(indexes=indexes)
 
     def __len__(self):
-        return len(self._im_paths) // self._batch_size
+        return len(self._data) // self._batch_size

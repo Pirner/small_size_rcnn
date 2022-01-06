@@ -10,6 +10,7 @@ class RCNNTrainWrapper:
 
         self._build_vgg16_model()
         self._build_optimizer()
+        self._compile_model()
 
     def _compile_model(self):
         """
@@ -42,6 +43,7 @@ class RCNNTrainWrapper:
         x = vgg_model.layers[-2].output
 
         predictions = tf.keras.layers.Dense(2, activation='softmax')(x)
+        # predictions = tf.keras.layers.Dense(1, activation='sigmoid')(x)
 
         model_final = tf.keras.Model(inputs=vgg_model.input, outputs=predictions)
 
@@ -67,8 +69,8 @@ class RCNNTrainWrapper:
 
         hist = self._model.fit_generator(
             generator=train_data,
-            steps_per_epoch=10,
-            epochs=5,
+            # steps_per_epoch=10,
+            epochs=100,
             validation_data=validation_data,
             validation_steps=2,
             callbacks=[checkpoint, early]

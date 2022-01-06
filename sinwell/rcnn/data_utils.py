@@ -92,7 +92,7 @@ class DataLoader:
                         t_image_path = os.path.join(save_dir, '{:06d}.png'.format(n))
                         cv2.imwrite(t_image_path, resized)
                         t_image_paths.append(t_image_path)
-                        labels.append(1)
+                        labels.append((0, 1))
                         # write label
                         label_path = os.path.join(save_dir, '{:06d}.txt'.format(n))
                         f = open(label_path, 'a')
@@ -110,7 +110,7 @@ class DataLoader:
                     t_image_path = os.path.join(save_dir, '{:06d}.png'.format(n))
                     cv2.imwrite(os.path.join(save_dir, '{:06d}.png'.format(n)), resized)
                     t_image_paths.append(t_image_path)
-                    labels.append(0)
+                    labels.append((1, 0))
                     # write label
                     label_path = os.path.join(save_dir, '{:06d}.txt'.format(n))
                     f = open(label_path, 'a')
@@ -120,10 +120,13 @@ class DataLoader:
                     n += 1
                     false_counter += 1
 
-                if i > 30:
-                    break
+            if i > 10:
+                break
 
-        train_gen = AirplaneDataGenerator(t_image_paths, labels)
+        train_gen = AirplaneDataGenerator(t_image_paths, labels, batch_size=2)
+        val_gen = None
+
+        return train_gen, val_gen
 
     @staticmethod
     def load_data_csv_legacy(root_dir, annotation_dir):
